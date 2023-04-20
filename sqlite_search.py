@@ -19,11 +19,20 @@
 
 import sqlite3
 import argparse
+import re
 
 # tabulate is an MIT licensed library and can be found here: https://pypi.org/project/tabulate/
 from tabulate import tabulate
 
-def search_sqlite(input_file: str, search_text: str, case_sensitive: bool = False, show_details: bool = False) -> None:
+# This is bad, but I'm doing it anyway
+# I could probably do this with some kind of dependency injection -- pass in a "CellSearcher" object which contains the search method
+regex = None
+
+def search_sqlite(input_file: str, 
+                  search_text: str, 
+                  case_sensitive: bool = False, 
+                  show_details: bool = False,
+                  regex_search: bool = False) -> None:
     print(f"Opening database '{input_file}' in read-only mode.")
 
     conn = sqlite3.connect(rf"{input_file}")
@@ -45,16 +54,28 @@ def search_sqlite(input_file: str, search_text: str, case_sensitive: bool = Fals
 
     print(f"Got {len(tables)} tables.\n")
 
-
+    if regex_search:
+        regex = re.compile(search_text)
+    
     # There's probably a more elegant way to do this
     table_name_matches = []
     for table in tables:
-        if case_sensitive:
-            if search_text in table:
-                table_name_matches.append(table)
+        matched = False
+
+        if regex_search and regex != None:
+            if regex.search(table):
+                matched = True
         else:
-            if search_text.casefold() in table.casefold():
-                table_name_matches.append(table)
+            if case_sensitive:
+                if search_text in table:
+                    matched = True
+            else:
+                if search_text.casefold() in table.casefold():
+                    matched = True
+
+        if matched:
+            table_name_matches.append(table)
+
 
     if len(table_name_matches) > 0:
         print(f"Found '{search_text}' in the following Table names:\n")
@@ -73,13 +94,22 @@ def search_sqlite(input_file: str, search_text: str, case_sensitive: bool = Fals
         row_matches = []
 
         for row in cursor:
+            matched = False
             for col in row:
-                if case_sensitive:
-                    if search_text in str(col):
-                        row_matches.append(row)
+                if regex_search and regex != None:
+                    if regex.search(col):
+                        matched = True
                 else:
-                    if search_text.casefold() in str(col).casefold():
-                        row_matches.append(row)
+                    if case_sensitive:
+                        if search_text in str(col):
+                            matched = True
+                    else:
+                        if search_text.casefold() in str(col).casefold():
+                            matched = True
+                
+                if matched:
+                    row_matches.append(row)
+                    break
         
         if len(row_matches) > 0:
             if not show_details:
@@ -104,14 +134,27 @@ parser.add_argument('-i', '--input',
 
 parser.add_argument('-s', '--search-for',
                     help='The text you want to search for.',
-                    required=True,
                     dest='search_string')
 
-parser.add_argument('-c', '--case-sensitive',
-                    action='store_true',
-                    help='Search for a case-sensitive string.')
+# This is disabled since I hacked in Regex support. When that gets fixed I'll enable this.
+# parser.add_argument('-k', '--keyword-list',
+#                     help='A text file containing a single search term on each line. Do not use -s with -k.',
+#                     dest='keyword_list')
 
-parser.add_argument('-d', '--show-details',
+parser.add_argument( '--regex',
+                    action='store_true',
+                    help='Search using Regexs.')
+
+# This is disabled until it's implemented. A cool way to do that would be to build an "Outputter" class
+# parser.add_argument('--csv',
+#                     action='store_true',
+#                     help='Output a CSV of each result, with the Table name in the leftmost column. This script does not write the CSV to the disk, only to STDOUT')
+
+parser.add_argument('--case-sensitive',
+                    action='store_true',
+                    help='Search for a case-sensitive string. Do not use this with --regex.')
+
+parser.add_argument('--show-details',
                     action='store_true',
                     help='Show each row that contains the search text, rather than just the counts.')
 
