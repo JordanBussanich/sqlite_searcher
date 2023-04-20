@@ -14,4 +14,4 @@ Right now this script will search for a single string in a single SQLite databas
 
 ## Dependencies?
 
-This script depends on 'tabulate', pip install it if you need it.
+This script depends on 'tabulate', pip install it if you don't have it.
