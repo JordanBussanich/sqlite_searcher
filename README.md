@@ -1,6 +1,6 @@
 # SQLite Searcher
 
-This tool searchers SQLite files for a string.
+This tool searches SQLite files for a string.
 
 ## What works?
 
