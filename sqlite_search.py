@@ -20,6 +20,10 @@
 import sqlite3
 import argparse
 import re
+import typing
+import sys
+
+from abc import ABC, abstractmethod
 
 # tabulate is an MIT licensed library and can be found here: https://pypi.org/project/tabulate/
 from tabulate import tabulate
@@ -28,11 +32,81 @@ from tabulate import tabulate
 # I could probably do this with some kind of dependency injection -- pass in a "CellSearcher" object which contains the search method
 regex = None
 
-def search_sqlite(input_file: str, 
-                  search_text: str, 
-                  case_sensitive: bool = False, 
-                  show_details: bool = False,
-                  regex_search: bool = False) -> None:
+class RowSearchResult:
+    def __init__(self, search_term: str, result: str, column_names: list[str], table_name: str, row: list) -> None:
+        self.search_term = search_term
+        self.result = result
+        self.column_names = column_names
+        self.table_name = table_name
+        self.row = row
+    
+    def __hash__(self) -> int:
+        return hash((self.search_term, self.result, ','.join(self.column_names), ','.join(map(str, self.row)), self.table_name))
+    
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, type(self)):
+            return NotImplemented
+        return self.search_term == __value.search_term and self.result == __value.result and self.column_names == __value.column_names and self.table_name == __value.table_name and self.row == __value.row
+
+
+class TableSearchResult:
+    def __init__(self, search_term: str, result: str) -> None:
+        self.search_term = search_term
+        self.result = result
+    
+    def __hash__(self) -> int:
+        return hash((self.search_term, self.result))
+    
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, type(self)):
+            return NotImplemented
+        return self.search_term == __value.search_term and self.result == __value.result
+
+
+class CellSearcher(ABC):
+    @abstractmethod
+    def search_cell(self, cell_content: str) -> bool:
+        return
+    
+    def __init__(self, search_term: str, case_sensitive: bool) -> None:
+        self.search_term = search_term
+
+
+class TextCellSearcher(CellSearcher):
+    def search_cell(self, cell_content: str) -> bool:
+        if self.case_sensitive:
+            if self.search_term in cell_content:
+                return True
+        else:
+            if self.search_term.casefold() in str(cell_content).casefold():
+                return True
+        
+        return False
+
+    def __init__(self, search_term: str, case_sensitive: bool) -> None:
+        super().__init__(search_term, case_sensitive)
+        self.case_sensitive = case_sensitive
+
+
+class RegexCellSearcher(CellSearcher):
+    def search_cell(self, cell_content: str) -> bool:
+        return bool(self.regex.match(self.search_term))
+
+    def __init__(self, search_term: str, case_sensitive: bool) -> None:
+        super().__init__(search_term, case_sensitive)
+
+        if case_sensitive:
+            self.regex = re.compile(search_term)
+        else:
+            self.regex = re.compile(search_term, re.IGNORECASE)
+
+        self.case_sensitive = case_sensitive
+
+
+def search_sqlite(searchers: list[CellSearcher], input_file: str) -> typing.Tuple[list[TableSearchResult], list[RowSearchResult]]:
+    table_search_results = list[TableSearchResult]()
+    row_search_results = list[RowSearchResult]()
+    
     print(f"Opening database '{input_file}' in read-only mode.")
 
     conn = sqlite3.connect(rf"{input_file}")
@@ -52,37 +126,18 @@ def search_sqlite(input_file: str,
 
     tables = [table[0] for table in tables_raw]
 
-    print(f"Got {len(tables)} tables.\n")
-
-    if regex_search:
-        regex = re.compile(search_text)
+    print(f"Got {len(tables)} tables.")
     
-    # There's probably a more elegant way to do this
-    table_name_matches = []
+    table_name_matches = set()
     for table in tables:
-        matched = False
-
-        if regex_search and regex != None:
-            if regex.search(table):
-                matched = True
-        else:
-            if case_sensitive:
-                if search_text in table:
-                    matched = True
-            else:
-                if search_text.casefold() in table.casefold():
-                    matched = True
-
-        if matched:
-            table_name_matches.append(table)
-
+        for searcher in searchers:
+            if searcher.search_cell(table):
+                table_name_matches.add(TableSearchResult(searcher.search_term, table))
+    
 
     if len(table_name_matches) > 0:
-        print(f"Found '{search_text}' in the following Table names:\n")
-        for match in table_name_matches:
-            print(match)
-    else:
-        print(f"Did not find '{search_text}' in any Table names.\n")
+        table_search_results.extend(table_name_matches)
+    
 
     for table in tables:
         get_table_query = f"""SELECT * FROM {table}"""
@@ -91,37 +146,21 @@ def search_sqlite(input_file: str,
 
         column_names = [description[0] for description in cursor.description]
         
-        row_matches = []
+        row_matches = set()
 
         for row in cursor:
-            matched = False
             for col in row:
-                if regex_search and regex != None:
-                    if regex.search(col):
-                        matched = True
-                else:
-                    if case_sensitive:
-                        if search_text in str(col):
-                            matched = True
-                    else:
-                        if search_text.casefold() in str(col).casefold():
-                            matched = True
-                
-                if matched:
-                    row_matches.append(row)
-                    break
+                for searcher in searchers:
+                    if searcher.search_cell(col):
+                        row_matches.add(RowSearchResult(searcher.search_term, col, column_names, table, row))
         
         if len(row_matches) > 0:
-            if not show_details:
-                print(f"Found {str(len(row_matches))} instances of '{search_text}' in '{table}'")
-            else:
-                print(f"Found '{search_text}' in the following rows in '{table}'.\n")
-                print(tabulate(row_matches, headers=column_names, tablefmt='orgtbl'))
-                print()
-        else:
-            print(f"Did not find '{search_text}' in '{table}'.")
+            row_search_results.extend(row_matches)
     
+    print(f"Closing database '{input_file}'.")
     conn.close()
+
+    return (table_search_results, row_search_results)
         
 
 parser = argparse.ArgumentParser(prog='sqlite_searcher',
@@ -136,10 +175,9 @@ parser.add_argument('-s', '--search-for',
                     help='The text you want to search for.',
                     dest='search_string')
 
-# This is disabled since I hacked in Regex support. When that gets fixed I'll enable this.
-# parser.add_argument('-k', '--keyword-list',
-#                     help='A text file containing a single search term on each line. Do not use -s with -k.',
-#                     dest='keyword_list')
+parser.add_argument('-k', '--keyword-list',
+                    help='A text file containing a single search term on each line. Do not use -s with -k.',
+                    dest='keyword_list')
 
 parser.add_argument( '--regex',
                     action='store_true',
@@ -159,4 +197,64 @@ parser.add_argument('--show-details',
                     help='Show each row that contains the search text, rather than just the counts.')
 
 arguments = parser.parse_args()
-search_sqlite(arguments.input_file, arguments.search_string, arguments.case_sensitive, arguments.show_details)
+
+keywords = list[str]()
+
+if arguments.keyword_list:
+    with open(arguments.keyword_list) as f:
+        keywords.extend(f.read().splitlines())
+else:
+    if arguments.search_string:
+        keywords.append(arguments.search_string)
+    else:
+        print('ERROR: No search term or keyword list provided.')
+        sys.exit(0)
+
+print('Searching for the following keywords:\n')
+print('\n'.join(keywords))
+print()
+
+searchers = list[CellSearcher]()
+for keyword in keywords:
+    if arguments.regex:
+        searchers.append(RegexCellSearcher(keyword, arguments.case_sensitive))
+    else:
+        searchers.append(TextCellSearcher(keyword, arguments.case_sensitive))
+
+results = search_sqlite(searchers, arguments.input_file)
+
+print()
+
+# Table names
+if len(results[0]) > 0:
+    print("Found the following keywords in the following Table names:")
+    table_output = zip([r.search_term for r in results[0]], [r.result for r in results[0]])
+    print(tabulate(table_output, ('Keyword', 'Table'), tablefmt='mixed_outline'))
+else:
+    print('No keywords found in any Table names.')
+
+print()
+
+# Table content
+if len(results[1]) > 0:
+    for table in set([r.table_name for r in results[1]]):
+        table_output_rows = list()
+        first = True
+        column_headers = ['Search Term', 'Search Result']
+        for row in [s for s in results[1] if s.table_name == table]:
+            table_output = list()
+            table_output.append(row.search_term)
+            table_output.append(row.result)
+            table_output.extend(row.row)
+            table_output_rows.append(table_output)
+
+            if first:
+                column_headers.extend(row.column_names)
+                first = False
+        
+        print(f"Keyword matches for '{table}':")
+        print(tabulate(table_output_rows, column_headers, tablefmt='mixed_outline'))
+        print()
+    
+else:
+    print('No keywords found in any Tables.')
