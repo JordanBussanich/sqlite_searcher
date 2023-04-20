@@ -28,9 +28,6 @@ from abc import ABC, abstractmethod
 # tabulate is an MIT licensed library and can be found here: https://pypi.org/project/tabulate/
 from tabulate import tabulate
 
-# This is bad, but I'm doing it anyway
-# I could probably do this with some kind of dependency injection -- pass in a "CellSearcher" object which contains the search method
-regex = None
 
 class RowSearchResult:
     def __init__(self, search_term: str, result: str, column_names: list[str], table_name: str, row: list) -> None:
