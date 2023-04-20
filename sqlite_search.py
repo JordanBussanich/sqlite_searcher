@@ -234,24 +234,38 @@ print()
 
 # Table content
 if len(results[1]) > 0:
-    for table in set([r.table_name for r in results[1]]):
-        table_output_rows = list()
-        first = True
-        column_headers = ['Search Term', 'Search Result']
-        for row in [s for s in results[1] if s.table_name == table]:
-            table_output = list()
-            table_output.append(row.search_term)
-            table_output.append(row.result)
-            table_output.extend(row.row)
-            table_output_rows.append(table_output)
+    if arguments.show_details:
+        for table in set([r.table_name for r in results[1]]):
+            table_output_rows = list()
+            first = True
+            column_headers = ['Search Term', 'Search Result']
+            for row in [s for s in results[1] if s.table_name == table]:
+                table_output = list()
+                table_output.append(row.search_term)
+                table_output.append(row.result)
+                table_output.extend(row.row)
+                table_output_rows.append(table_output)
 
-            if first:
-                column_headers.extend(row.column_names)
-                first = False
-        
-        print(f"Keyword matches for '{table}':")
-        print(tabulate(table_output_rows, column_headers, tablefmt='mixed_outline'))
-        print()
-    
+                if first:
+                    column_headers.extend(row.column_names)
+                    first = False
+            
+            print(f"Keyword matches for '{table}':")
+            print(tabulate(table_output_rows, column_headers, tablefmt='mixed_outline'))
+            print()
+    else:
+        result = dict()
+        for table in set([r.table_name for r in results[1]]):
+            result[table] = {}
+            for row in [s for s in results[1] if s.table_name == table]:
+                if row.search_term in result[table]:
+                    result[table][row.search_term] += 1
+                else:
+                    result[table][row.search_term] = 1
+            
+        for table, matches in result.items():
+            for keyword, count in matches.items():
+                print(f"Found {count} instances of '{keyword}' in '{table}'.")
+         
 else:
     print('No keywords found in any Tables.')
