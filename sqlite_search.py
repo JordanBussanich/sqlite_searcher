@@ -87,7 +87,7 @@ class TextCellSearcher(CellSearcher):
 
 class RegexCellSearcher(CellSearcher):
     def search_cell(self, cell_content: str) -> bool:
-        return bool(self.regex.match(self.search_term))
+        return bool(self.regex.match(cell_content))
 
     def __init__(self, search_term: str, case_sensitive: bool) -> None:
         super().__init__(search_term, case_sensitive)
