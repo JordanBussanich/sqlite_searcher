@@ -67,6 +67,7 @@ class CellSearcher(ABC):
     
     def __init__(self, search_term: str, case_sensitive: bool) -> None:
         self.search_term = search_term
+        self.case_sensitive = case_sensitive
 
 
 class TextCellSearcher(CellSearcher):
@@ -82,7 +83,6 @@ class TextCellSearcher(CellSearcher):
 
     def __init__(self, search_term: str, case_sensitive: bool) -> None:
         super().__init__(search_term, case_sensitive)
-        self.case_sensitive = case_sensitive
 
 
 class RegexCellSearcher(CellSearcher):
@@ -95,9 +95,7 @@ class RegexCellSearcher(CellSearcher):
         if case_sensitive:
             self.regex = re.compile(search_term)
         else:
-            self.regex = re.compile(search_term, re.IGNORECASE)
-
-        self.case_sensitive = case_sensitive
+            self.regex = re.compile(search_term, re.IGNORECASE)       
 
 
 def search_sqlite(searchers: list[CellSearcher], input_file: str) -> typing.Tuple[list[TableSearchResult], list[RowSearchResult]]:
