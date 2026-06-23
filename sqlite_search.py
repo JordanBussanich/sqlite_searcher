@@ -156,114 +156,117 @@ def search_sqlite(searchers: list[CellSearcher], input_file: str) -> typing.Tupl
     conn.close()
 
     return (table_search_results, row_search_results)
-        
 
-parser = argparse.ArgumentParser(prog='sqlite_searcher',
-                                 description='This program searches SQLite files for a string')
 
-parser.add_argument('-i', '--input',
-                    help='The input SQLite database.',
-                    required=True,
-                    dest='input_file')
 
-parser.add_argument('-s', '--search-for',
-                    help='The text you want to search for.',
-                    dest='search_string')
 
-parser.add_argument('-k', '--keyword-list',
-                    help='A text file containing a single search term on each line. Do not use -s with -k.',
-                    dest='keyword_list')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(prog='sqlite_searcher',
+                                    description='This program searches SQLite files for a string')
 
-parser.add_argument( '--regex',
-                    action='store_true',
-                    help='Search using Regexs.')
+    parser.add_argument('-i', '--input',
+                        help='The input SQLite database.',
+                        required=True,
+                        dest='input_file')
 
-# This is disabled until it's implemented. A cool way to do that would be to build an "Outputter" class
-# parser.add_argument('--csv',
-#                     action='store_true',
-#                     help='Output a CSV of each result, with the Table name in the leftmost column. This script does not write the CSV to the disk, only to STDOUT')
+    parser.add_argument('-s', '--search-for',
+                        help='The text you want to search for.',
+                        dest='search_string')
 
-parser.add_argument('--case-sensitive',
-                    action='store_true',
-                    help='Search for a case-sensitive string. Do not use this with --regex.')
+    parser.add_argument('-k', '--keyword-list',
+                        help='A text file containing a single search term on each line. Do not use -s with -k.',
+                        dest='keyword_list')
 
-parser.add_argument('--show-details',
-                    action='store_true',
-                    help='Show each row that contains the search text, rather than just the counts.')
+    parser.add_argument( '--regex',
+                        action='store_true',
+                        help='Search using Regexs.')
 
-arguments = parser.parse_args()
+    # This is disabled until it's implemented. A cool way to do that would be to build an "Outputter" class
+    # parser.add_argument('--csv',
+    #                     action='store_true',
+    #                     help='Output a CSV of each result, with the Table name in the leftmost column. This script does not write the CSV to the disk, only to STDOUT')
 
-keywords = list[str]()
+    parser.add_argument('--case-sensitive',
+                        action='store_true',
+                        help='Search for a case-sensitive string. Do not use this with --regex.')
 
-if arguments.keyword_list:
-    with open(arguments.keyword_list) as f:
-        keywords.extend(f.read().splitlines())
-else:
-    if arguments.search_string:
-        keywords.append(arguments.search_string)
+    parser.add_argument('--show-details',
+                        action='store_true',
+                        help='Show each row that contains the search text, rather than just the counts.')
+
+    arguments = parser.parse_args()
+
+    keywords = list[str]()
+
+    if arguments.keyword_list:
+        with open(arguments.keyword_list) as f:
+            keywords.extend(f.read().splitlines())
     else:
-        print('ERROR: No search term or keyword list provided.')
-        sys.exit(0)
+        if arguments.search_string:
+            keywords.append(arguments.search_string)
+        else:
+            print('ERROR: No search term or keyword list provided.')
+            sys.exit(0)
 
-print('Searching for the following keywords:\n')
-print('\n'.join(keywords))
-print()
+    print('Searching for the following keywords:\n')
+    print('\n'.join(keywords))
+    print()
 
-searchers = list[CellSearcher]()
-for keyword in keywords:
-    if arguments.regex:
-        searchers.append(RegexCellSearcher(keyword, arguments.case_sensitive))
+    searchers = list[CellSearcher]()
+    for keyword in keywords:
+        if arguments.regex:
+            searchers.append(RegexCellSearcher(keyword, arguments.case_sensitive))
+        else:
+            searchers.append(TextCellSearcher(keyword, arguments.case_sensitive))
+
+    results = search_sqlite(searchers, arguments.input_file)
+
+    print()
+
+    # Table names
+    if len(results[0]) > 0:
+        print("Found the following keywords in the following Table names:")
+        table_output = zip([r.search_term for r in results[0]], [r.result for r in results[0]])
+        print(tabulate(table_output, ('Keyword', 'Table'), tablefmt='mixed_outline'))
     else:
-        searchers.append(TextCellSearcher(keyword, arguments.case_sensitive))
+        print('No keywords found in any Table names.')
 
-results = search_sqlite(searchers, arguments.input_file)
+    print()
 
-print()
+    # Table content
+    if len(results[1]) > 0:
+        if arguments.show_details:
+            for table in set([r.table_name for r in results[1]]):
+                table_output_rows = list()
+                first = True
+                column_headers = ['Search Term', 'Search Result']
+                for row in [s for s in results[1] if s.table_name == table]:
+                    table_output = list()
+                    table_output.append(row.search_term)
+                    table_output.append(row.result)
+                    table_output.extend(row.row)
+                    table_output_rows.append(table_output)
 
-# Table names
-if len(results[0]) > 0:
-    print("Found the following keywords in the following Table names:")
-    table_output = zip([r.search_term for r in results[0]], [r.result for r in results[0]])
-    print(tabulate(table_output, ('Keyword', 'Table'), tablefmt='mixed_outline'))
-else:
-    print('No keywords found in any Table names.')
-
-print()
-
-# Table content
-if len(results[1]) > 0:
-    if arguments.show_details:
-        for table in set([r.table_name for r in results[1]]):
-            table_output_rows = list()
-            first = True
-            column_headers = ['Search Term', 'Search Result']
-            for row in [s for s in results[1] if s.table_name == table]:
-                table_output = list()
-                table_output.append(row.search_term)
-                table_output.append(row.result)
-                table_output.extend(row.row)
-                table_output_rows.append(table_output)
-
-                if first:
-                    column_headers.extend(row.column_names)
-                    first = False
+                    if first:
+                        column_headers.extend(row.column_names)
+                        first = False
+                
+                print(f"Keyword matches for '{table}':")
+                print(tabulate(table_output_rows, column_headers, tablefmt='mixed_outline'))
+                print()
+        else:
+            result = dict()
+            for table in set([r.table_name for r in results[1]]):
+                result[table] = {}
+                for row in [s for s in results[1] if s.table_name == table]:
+                    if row.search_term in result[table]:
+                        result[table][row.search_term] += 1
+                    else:
+                        result[table][row.search_term] = 1
+                
+            for table, matches in result.items():
+                for keyword, count in matches.items():
+                    print(f"Found {count} instances of '{keyword}' in '{table}'.")
             
-            print(f"Keyword matches for '{table}':")
-            print(tabulate(table_output_rows, column_headers, tablefmt='mixed_outline'))
-            print()
     else:
-        result = dict()
-        for table in set([r.table_name for r in results[1]]):
-            result[table] = {}
-            for row in [s for s in results[1] if s.table_name == table]:
-                if row.search_term in result[table]:
-                    result[table][row.search_term] += 1
-                else:
-                    result[table][row.search_term] = 1
-            
-        for table, matches in result.items():
-            for keyword, count in matches.items():
-                print(f"Found {count} instances of '{keyword}' in '{table}'.")
-         
-else:
-    print('No keywords found in any Tables.')
+        print('No keywords found in any Tables.')
