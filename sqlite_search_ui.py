@@ -6,16 +6,26 @@
 
 import tkinter as tk
 
-from tkinter import ttk
+from tkinter import ttk, filedialog
+
+from ui.main.controller import MainController
+from ui.main.view import MainView
 
 from sqlite_search import *
 
+
 def initialize():
     root = tk.Tk()
-    
-    root.geometry("400x400")
+
+    controller = MainController()
+
+    view = MainView(root, controller)
+
+    controller.bind_view(view)
 
     root.mainloop()
+
+
 
 if __name__ == "__main__":
     initialize()
