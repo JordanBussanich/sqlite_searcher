@@ -11,7 +11,7 @@ from tkinter import ttk, filedialog
 
 #from controller import MainController
 
-def set_theme(root: tk.Tk):
+def set_theme(root: tk.Tk) -> None:
     style = ttk.Style()
 
     available_themes = set(style.theme_names())
@@ -33,12 +33,15 @@ def set_theme(root: tk.Tk):
 
 
 class MainView:
-    def __init__(self, root: tk.Tk, controller):    
+    def __init__(self, root: tk.Tk, controller) -> None:    
         self.controller = controller
         
+        set_theme(root)
+
         self.root = root
         self.root.title("SQLite Searcher UI")
-        self.root.geometry("400x400")
+        self.root.geometry("600x600")
+        self.root.minsize(600, 600)
 
         self.main_frame = ttk.Frame(root)
         self.main_frame.pack(padx=12, pady=12, fill="both", expand="true")
@@ -77,19 +80,76 @@ class MainView:
         self.search_query_frame = ttk.LabelFrame(
             self.search_frame,
             text="Search Query",
-            height = 120
+            height=80
         )
 
         self.search_query_frame.pack(fill="x")
 
-        self.search_query_frame.pack_propagate(False)
+        self.search_query_frame.grid_propagate(False)
 
+        self.search_query_frame.columnconfigure(0, weight=1)
+        self.search_query_frame.columnconfigure(1, weight=1)
+        self.search_query_frame.columnconfigure(2, weight=1)
+
+        self.search_query_entry = ttk.Entry(
+            self.search_query_frame,
+            state="disabled"
+        )
+
+        self.search_query_entry.grid(
+            row=0,
+            column=0,
+            columnspan=3,
+            sticky="ew",
+            padx=8,
+            pady=(8, 0)
+        )
+
+        self.case_sensitive = tk.BooleanVar(value=False)
+        self.case_sensitive_check = ttk.Checkbutton(
+            self.search_query_frame,
+            text="Case Sensitive",
+            variable=self.case_sensitive,
+            state="disabled"
+        )
+
+        self.case_sensitive_check.grid(
+            row=1,
+            column=0,
+            sticky="w",
+            padx=8,
+            pady=(8, 0)
+        )
+        
         self.search_results_frame = ttk.LabelFrame(
             self.search_frame,
             text="Results"
         )
-
+        
         self.search_results_frame.pack(fill="both", expand="true")
+
+        self.results = ttk.Treeview(
+            self.search_results_frame,
+            columns=("search_term", "column_name", "rowid"),
+            show="tree headings"
+        )
+
+        self.results.column("#0", width=100)
+        self.results.column("search_term", width=100)
+        self.results.column("column_name", width=100)
+        self.results.column("rowid", width=50)
+
+        self.results.heading("#0", text="Table")
+        self.results.heading("search_term", text="Search Term")
+        self.results.heading("column_name", text="Column Name")
+        self.results.heading("rowid", text="RowId")
+
+        self.results.pack(
+            fill="both",
+            expand=True,
+            padx=8,
+            pady=8,
+        )
 
         # Search button row (maybe some other options here later)***************
         self.search_button_frame = ttk.Frame(self.main_frame)
@@ -98,7 +158,8 @@ class MainView:
         self.search_button = ttk.Button(
             self.search_button_frame,
             text="Search",
-            command=lambda: self._on_search_click()
+            command=lambda: self._on_search_click(),
+            state="disabled"
         )
         self.search_button.pack(side="right")
 
@@ -118,7 +179,10 @@ class MainView:
         self.about_button.pack(side="left")
 
 
-    def _on_browse_click(self, entry: ttk.Entry):
+    def clear_results(self) -> None:
+        pass
+
+    def _on_browse_click(self, entry: ttk.Entry) -> None:
         file_path = filedialog.askopenfilename(
             title="Open SQLite Database...",
             filetypes=[
@@ -138,12 +202,15 @@ class MainView:
             self.sqlite_file_entry.insert(0, file_path)
             self.sqlite_file_entry.configure(state="readonly")
 
+            self.search_button.config(state="normal")
+            self.search_query_entry.config(state="normal")
+
     
-    def _on_search_click(self):
+    def _on_search_click(self) -> None:
         pass
 
-    def _on_clear_click(self):
+    def _on_clear_click(self) -> None:
         pass
 
-    def _on_about_click(self):
+    def _on_about_click(self) -> None:
         pass

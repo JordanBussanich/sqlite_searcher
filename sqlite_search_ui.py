@@ -14,7 +14,7 @@ from ui.main.view import MainView
 from sqlite_search import *
 
 
-def initialize():
+def initialize() -> None:
     root = tk.Tk()
 
     controller = MainController()
