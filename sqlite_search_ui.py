@@ -13,7 +13,6 @@ from ui.main.view import MainView
 
 from sqlite_search import *
 
-
 def initialize() -> None:
     root = tk.Tk()
 
@@ -24,7 +23,6 @@ def initialize() -> None:
     controller.bind_view(view)
 
     root.mainloop()
-
 
 
 if __name__ == "__main__":

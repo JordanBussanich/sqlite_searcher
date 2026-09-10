@@ -4,7 +4,6 @@
 # SQLite Search UI
 # Hacked together by Jordan Bussanich
 
-
 import sys
 import tkinter as tk
 import tkinter.font as tkfont
@@ -12,8 +11,6 @@ import tkinter.font as tkfont
 from dataclasses import dataclass
 from tkinter import ttk, filedialog, messagebox
 from textwrap import dedent
-
-#from controller import MainController
 
 def set_theme(root: tk.Tk) -> None:
     style = ttk.Style()
@@ -44,6 +41,7 @@ class MainView:
         column_name: str
         row_id: int
     
+
     def __init__(self, root: tk.Tk, controller) -> None:    
         self.controller = controller
         
@@ -260,8 +258,7 @@ class MainView:
                     )
                     
 
-        self.root.after(0, callback)
-        
+        self.root.after(0, callback) 
 
 
     def _on_browse_click(self, entry: ttk.Entry) -> None:
@@ -303,7 +300,6 @@ class MainView:
 
     def _on_clear_click(self) -> None:
         self.clear_results()
-
 
 
     def _on_about_click(self) -> None:
