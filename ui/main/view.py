@@ -4,10 +4,14 @@
 # SQLite Search UI
 # Hacked together by Jordan Bussanich
 
+
 import sys
 import tkinter as tk
+import tkinter.font as tkfont
 
-from tkinter import ttk, filedialog
+from dataclasses import dataclass
+from tkinter import ttk, filedialog, messagebox
+from textwrap import dedent
 
 #from controller import MainController
 
@@ -33,10 +37,19 @@ def set_theme(root: tk.Tk) -> None:
 
 
 class MainView:
+    @dataclass
+    class ResultsItem:
+        table_name: str
+        search_term: str
+        column_name: str
+        row_id: int
+    
     def __init__(self, root: tk.Tk, controller) -> None:    
         self.controller = controller
         
         set_theme(root)
+
+        default_font = tkfont.nametofont("TkDefaultFont")
 
         self.root = root
         self.root.title("SQLite Searcher UI")
@@ -87,8 +100,8 @@ class MainView:
 
         self.search_query_frame.grid_propagate(False)
 
-        self.search_query_frame.columnconfigure(0, weight=1)
-        self.search_query_frame.columnconfigure(1, weight=1)
+        self.search_query_frame.columnconfigure(0, weight=0)
+        self.search_query_frame.columnconfigure(1, weight=0)
         self.search_query_frame.columnconfigure(2, weight=1)
 
         self.search_query_entry = ttk.Entry(
@@ -120,6 +133,22 @@ class MainView:
             padx=8,
             pady=(8, 0)
         )
+
+        self.use_regex = tk.BooleanVar(value=False)
+        self.use_regex_check = ttk.Checkbutton(
+            self.search_query_frame,
+            text="Use RegEx",
+            variable=self.use_regex,
+            state="disabled"
+        )
+
+        self.use_regex_check.grid(
+            row=1,
+            column=1,
+            sticky="w",
+            padx=8,
+            pady=(8, 0)
+        )
         
         self.search_results_frame = ttk.LabelFrame(
             self.search_frame,
@@ -143,6 +172,11 @@ class MainView:
         self.results.heading("search_term", text="Search Term")
         self.results.heading("column_name", text="Column Name")
         self.results.heading("rowid", text="RowId")
+
+        self.results.tag_configure(
+            "bold",
+            font=(default_font.actual()["family"], default_font.actual()["size"], "bold")
+        )
 
         self.results.pack(
             fill="both",
@@ -180,7 +214,55 @@ class MainView:
 
 
     def clear_results(self) -> None:
-        pass
+        def callback() -> None:
+            self.results.delete(*self.results.get_children())
+
+        self.root.after(0, callback)
+    
+
+    def search_started(self) -> None:
+        def callback() -> None:
+            self.root.config(cursor="wait")
+        
+        self.root.after(0, callback)
+
+
+    def search_finished(self) -> None:
+        def callback() -> None:
+            self.root.config(cursor="")
+        
+        self.root.after(0, callback)
+
+
+    def show_results(self, results: list[ResultsItem]) -> None:
+        def callback() -> None:
+            for table_name in set(result.table_name for result in results):
+                table_id = self.results.insert(
+                    "",
+                    "end",
+                    text=table_name,
+                    open=True,
+                    tags=("bold",)
+                )
+
+                for result in sorted(
+                    (r for r in results if r.table_name == table_name),
+                    key=lambda r: (r.row_id, r.column_name)
+                ):
+                    self.results.insert(
+                        table_id,
+                        "end",
+                        values=(
+                            result.search_term,
+                            result.column_name,
+                            result.row_id
+                        )
+                    )
+                    
+
+        self.root.after(0, callback)
+        
+
 
     def _on_browse_click(self, entry: ttk.Entry) -> None:
         file_path = filedialog.askopenfilename(
@@ -204,13 +286,32 @@ class MainView:
 
             self.search_button.config(state="normal")
             self.search_query_entry.config(state="normal")
+            self.case_sensitive_check.config(state="normal")
+            self.use_regex_check.config(state="normal")
 
     
     def _on_search_click(self) -> None:
-        pass
+        self.clear_results()
+
+        self.controller.search(
+            self.sqlite_file_entry.get(),
+            self.search_query_entry.get(),
+            self.case_sensitive.get(),
+            self.use_regex.get()
+        )
+
 
     def _on_clear_click(self) -> None:
-        pass
+        self.clear_results()
+
+
 
     def _on_about_click(self) -> None:
-        pass
+        messagebox.showinfo(
+            "About SQLite Searcher UI",
+            """SQLite Search Copyright (C) 2023, 2026  Jordan Bussanich
+SQLite Search UI Copyright (C) 2026  Jordan Bussanich
+
+This software is licensed under the GNU GPL v2.0 Only licence.
+
+Made in Canada / Fabriqué au Canada""")

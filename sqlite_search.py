@@ -22,12 +22,16 @@ class RowSearchResult:
                  search_term: str, 
                  result: str, 
                  column_names: list[str],
-                 table_name: str, 
+                 column: str,
+                 table_name: str,
+                 rowid: int, 
                  row: list) -> None:
         self.search_term = search_term
         self.result = result
         self.column_names = column_names
+        self.column = column
         self.table_name = table_name
+        self.rowid = rowid
         self.row = row
     
     def __hash__(self) -> int:
@@ -45,6 +49,7 @@ class RowSearchResult:
             self.result == __value.result and
             self.column_names == __value.column_names and
             self.table_name == __value.table_name and
+            self.rowid == __value.rowid and
             self.row == __value.row
         )
 
@@ -147,7 +152,7 @@ def search_sqlite(
     
 
     for table in tables:
-        get_table_query = f"""SELECT * FROM {table}"""
+        get_table_query = f"""SELECT rowid, * FROM {table}"""
 
         cursor.execute(get_table_query)
 
@@ -156,14 +161,16 @@ def search_sqlite(
         row_matches = set()
 
         for row in cursor:
-            for col in row:
+            for column_index, column_value in enumerate(row):
                 for searcher in searchers:
-                    if searcher.search_cell(col):
+                    if searcher.search_cell(column_value):
                         row_matches.add(RowSearchResult(
                             searcher.search_term, 
-                            col, 
-                            column_names, 
-                            table, 
+                            column_value, 
+                            column_names,
+                            column_names[column_index], 
+                            table,
+                            row[0],
                             row
                         ))
         
