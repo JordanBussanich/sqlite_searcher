@@ -12,13 +12,14 @@ from ui.main.controller import MainController
 from ui.main.view import MainView
 
 from sqlite_search import *
+from version import __version__
 
 def initialize() -> None:
     root = tk.Tk()
 
     controller = MainController()
 
-    view = MainView(root, controller)
+    view = MainView(root, controller, __version__)
 
     controller.bind_view(view)
 

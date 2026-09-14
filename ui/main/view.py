@@ -42,8 +42,9 @@ class MainView:
         row_id: int
     
 
-    def __init__(self, root: tk.Tk, controller) -> None:    
+    def __init__(self, root: tk.Tk, controller, version: str) -> None:    
         self.controller = controller
+        self.version = version
         
         set_theme(root)
 
@@ -305,9 +306,24 @@ class MainView:
     def _on_about_click(self) -> None:
         messagebox.showinfo(
             "About SQLite Searcher UI",
-            """SQLite Search Copyright (C) 2023, 2026  Jordan Bussanich
+            f"""SQLite Searcher version {self.version}
+
+SQLite Search Copyright (C) 2023, 2026  Jordan Bussanich
 SQLite Search UI Copyright (C) 2026  Jordan Bussanich
+
+Made in Canada / Fabriqué au Canada
+
+This software was entirely designed and written by a human,
+not a LLM.
 
 This software is licensed under the GNU GPL v2.0 Only licence.
 
-Made in Canada / Fabriqué au Canada""")
+Its source code can be found here:
+
+https://github.com/jordanbussanich/sqlite_searcher
+
+This software includes third-party libraries licensed under
+their respective licences. Licence and copyright information is
+available at:
+
+https://github.com/jordanbussanich/sqlite_searcher/licences""")

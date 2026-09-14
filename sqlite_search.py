@@ -11,6 +11,7 @@ import typing
 import sys
 
 from abc import ABC, abstractmethod
+from version import __version__
 
 # tabulate is an MIT licensed library and can be found here: 
 # https://pypi.org/project/tabulate/
