@@ -6,8 +6,6 @@
 
 import tkinter as tk
 
-from tkinter import ttk, filedialog
-
 from ui.main.controller import MainController
 from ui.main.view import MainView
 

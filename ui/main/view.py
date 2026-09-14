@@ -10,7 +10,6 @@ import tkinter.font as tkfont
 
 from dataclasses import dataclass
 from tkinter import ttk, filedialog, messagebox
-from textwrap import dedent
 
 def set_theme(root: tk.Tk) -> None:
     style = ttk.Style()
@@ -174,7 +173,11 @@ class MainView:
 
         self.results.tag_configure(
             "bold",
-            font=(default_font.actual()["family"], default_font.actual()["size"], "bold")
+            font=(
+                default_font.actual()["family"], 
+                default_font.actual()["size"], 
+                "bold"
+            )
         )
 
         self.results.pack(

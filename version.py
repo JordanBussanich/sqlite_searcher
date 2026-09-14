@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 # Copyright (C)  2026  Jordan Bussanich
 
-# This module manages the version number
+# This module manages the version number.
 # Hacked together by Jordan Bussanich
 
 import sys
