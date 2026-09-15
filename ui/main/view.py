@@ -4,6 +4,7 @@
 # SQLite Search UI
 # Hacked together by Jordan Bussanich
 
+import i18n
 import sys
 import tkinter as tk
 import tkinter.font as tkfont
@@ -63,7 +64,7 @@ class MainView:
 
         self.browse_box_label = ttk.Label(
             self.open_file_frame, 
-            text="SQLite File"
+            text=i18n.t("main.sqlite_file")
         )
         self.browse_box_label.pack(side="left")
 
@@ -75,7 +76,7 @@ class MainView:
         
         self.browse_button = ttk.Button(
             self.open_file_frame,
-            text="Browse...",
+            text=i18n.t("main.browse"),
             command=lambda: self._on_browse_click(self.sqlite_file_entry)
         )
         self.browse_button.pack(side="left")
@@ -90,7 +91,7 @@ class MainView:
 
         self.search_query_frame = ttk.LabelFrame(
             self.search_frame,
-            text="Search Query",
+            text=i18n.t("main.search_query"),
             height=80
         )
 
