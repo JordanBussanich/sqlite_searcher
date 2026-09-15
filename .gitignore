@@ -229,3 +229,4 @@ __marimo__/
 *.onefile-build/
 nuitka-crash-report.xml
 sqlite_search_ui.exe
+sqlite_search_ui.dist.*
