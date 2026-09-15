@@ -12,7 +12,7 @@
     "about": "À propos",
     "clear": "Effacer",
     "search": "Rechercher",
-    "about_box_title": "À propos de SQLite Searcher",
+    "about_box_title": "À propos de SQLite Searcher UI",
     "about_text": "Version de SQLite Searcher: %{version}\n\nSQLite Search (C) 2023, 2026 Jordan Bussanich\nSQLite Searcher UI (C) 2026 Jordan Bussanich\n\nFabriqué au Canada / Made in Canada\n\nCe logiciel a été entièrement conçu et développé par un humain, et non par un LLM.\n\nCe logiciel est distribué sous licence GNU GPL v2.0 Only.\n\nSon code source est disponible ici:\n\nhttps://github.com/jordanbussanich/sqlite_searcher\n\nCe logiciel inclut des bibliothèques tierces distribuées sous leurs licences respectives. Les renseignements sur les licences et les droits d'auteur sont disponibles à l'adresse suivante:\n\nhttps://github.com/jordanbussanich/sqlite_searcher/licences"
   }
 
