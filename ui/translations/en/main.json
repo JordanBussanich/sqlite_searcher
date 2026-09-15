@@ -13,6 +13,6 @@
     "clear": "Clear",
     "search": "Search",
     "about_box_title": "About SQLite Searcher",
-    "about_text": "SQLite Searcher version %{version}\n\nSQLite Search Copyright (C) 2023, 2026  Jordan Bussanich\nSQLite Search UI Copyright (C) 2026  Jordan Bussanich\n\nMade in Canada / Fabriqué au Canada\n\nThis software was entirely designed and written by a human, not a LLM.\n\nThis software is licensed under the GNU GPL v2.0 Only licence.\n\nIts source code can be found here:\n\nhttps://github.com/jordanbussanich/sqlite_searcher\n\nThis software includes third-party libraries licensed under their respective licences. Licence and copyright information is available at:\n\nhttps://github.com/jordanbussanich/sqlite_searcher/licences"
+    "about_text": "SQLite Searcher version %{version}\n\nSQLite Search Copyright (C) 2023, 2026  Jordan Bussanich\nSQLite Search UI Copyright (C) 2026  Jordan Bussanich\n\nMade in Canada / Fabriqué au Canada\n\nThis software was entirely designed and written by a human, not a LLM.\n\nThis software is licensed under the GNU GPL v2.0 licence.\n\nIts source code can be found here:\n\nhttps://github.com/jordanbussanich/sqlite_searcher\n\nThis software includes third-party libraries licensed under their respective licences. Licence and copyright information is available at:\n\nhttps://github.com/jordanbussanich/sqlite_searcher/licences"
   }
 
