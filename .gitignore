@@ -1,4 +1,4 @@
-.vscode/launch.json
+.vscode
 keywords.txt
 
 # Byte-compiled / optimized / DLL files
@@ -156,6 +156,7 @@ activemq-data/
 .env
 .envrc
 .venv
+.venv-*
 env/
 venv/
 ENV/
@@ -221,3 +222,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Nuitka
+*.build/
+*.dist/
+*.onefile-build/
+nuitka-crash-report.xml
+sqlite_search_ui.exe
+sqlite_search_ui.dist.*
