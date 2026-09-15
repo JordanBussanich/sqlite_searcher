@@ -1,4 +1,5 @@
 .vscode
+.vscode
 keywords.txt
 
 # Byte-compiled / optimized / DLL files
@@ -156,6 +157,7 @@ activemq-data/
 .env
 .envrc
 .venv
+.venv-*
 .venv-*
 env/
 venv/
