@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-2.0-only
+# SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2023, 2026  Jordan Bussanich
 
 # SQLite Search
