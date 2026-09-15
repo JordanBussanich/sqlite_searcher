@@ -21,7 +21,7 @@ def initialize() -> None:
     translations_folder = Path(__file__).parent.resolve() / "ui" / "translations"
 
     # Uncomment to test it in French
-    i18n.set("locale", "fr")
+    #i18n.set("locale", "fr")
 
     i18n.load_path.append(str(translations_folder))
 

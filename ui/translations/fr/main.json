@@ -2,6 +2,17 @@
   {
     "sqlite_file": "Fichier SQLite",
     "browse": "Parcourir...",
-    "search_query": "Requête de recherche"
+    "search_query": "Requête de recherche",
+    "case_sensitive": "Sensible à la casse",
+    "use_regex": "Utiliser RegEx",
+    "results": "Résultats",
+    "table": "Table",
+    "search_term": "Terme de recherche",
+    "column_name": "Nom de la colonne",
+    "about": "À propos",
+    "clear": "Effacer",
+    "search": "Rechercher",
+    "about_box_title": "À propos de SQLite Searcher",
+    "about_text": "Version de SQLite Searcher: %{version}\n\nSQLite Search (C) 2023, 2026 Jordan Bussanich\nSQLite Searcher UI (C) 2026 Jordan Bussanich\n\nFabriqué au Canada / Made in Canada\n\nCe logiciel a été entièrement conçu et développé par un humain, et non par un LLM.\n\nCe logiciel est distribué sous licence GNU GPL v2.0 Only.\n\nSon code source est disponible ici:\n\nhttps://github.com/jordanbussanich/sqlite_searcher\n\nCe logiciel inclut des bibliothèques tierces distribuées sous leurs licences respectives. Les renseignements sur les licences et les droits d'auteur sont disponibles à l'adresse suivante:\n\nhttps://github.com/jordanbussanich/sqlite_searcher/licences"
   }
 

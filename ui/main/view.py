@@ -120,7 +120,7 @@ class MainView:
         self.case_sensitive = tk.BooleanVar(value=False)
         self.case_sensitive_check = ttk.Checkbutton(
             self.search_query_frame,
-            text="Case Sensitive",
+            text=i18n.t("main.case_sensitive"),
             variable=self.case_sensitive,
             state="disabled"
         )
@@ -136,7 +136,7 @@ class MainView:
         self.use_regex = tk.BooleanVar(value=False)
         self.use_regex_check = ttk.Checkbutton(
             self.search_query_frame,
-            text="Use RegEx",
+            text=i18n.t("main.use_regex"),
             variable=self.use_regex,
             state="disabled"
         )
@@ -151,7 +151,7 @@ class MainView:
         
         self.search_results_frame = ttk.LabelFrame(
             self.search_frame,
-            text="Results"
+            text=i18n.t("main.results")
         )
         
         self.search_results_frame.pack(fill="both", expand="true")
@@ -167,9 +167,9 @@ class MainView:
         self.results.column("column_name", width=100)
         self.results.column("rowid", width=50)
 
-        self.results.heading("#0", text="Table")
-        self.results.heading("search_term", text="Search Term")
-        self.results.heading("column_name", text="Column Name")
+        self.results.heading("#0", text=i18n.t("main.table"))
+        self.results.heading("search_term", text=i18n.t("main.search_term"))
+        self.results.heading("column_name", text=i18n.t("main.column_name"))
         self.results.heading("rowid", text="RowId")
 
         self.results.tag_configure(
@@ -194,7 +194,7 @@ class MainView:
 
         self.search_button = ttk.Button(
             self.search_button_frame,
-            text="Search",
+            text=i18n.t("main.search"),
             command=lambda: self._on_search_click(),
             state="disabled"
         )
@@ -202,7 +202,7 @@ class MainView:
 
         self.clear_button = ttk.Button(
             self.search_button_frame,
-            text="Clear",
+            text=i18n.t("main.clear"),
             command=lambda: self._on_clear_click()
         )
 
@@ -210,7 +210,7 @@ class MainView:
 
         self.about_button = ttk.Button(
             self.search_button_frame,
-            text="About",
+            text=i18n.t("main.about"),
             command=lambda: self._on_about_click()
         )
         self.about_button.pack(side="left")
@@ -310,24 +310,26 @@ class MainView:
     def _on_about_click(self) -> None:
         messagebox.showinfo(
             "About SQLite Searcher UI",
-            f"""SQLite Searcher version {self.version}
+            i18n.t("main.about_text", version=self.version))
 
-SQLite Search Copyright (C) 2023, 2026  Jordan Bussanich
-SQLite Search UI Copyright (C) 2026  Jordan Bussanich
+#"""SQLite Searcher version {self.version}
 
-Made in Canada / Fabriqué au Canada
+# SQLite Search Copyright (C) 2023, 2026  Jordan Bussanich
+# SQLite Search UI Copyright (C) 2026  Jordan Bussanich
 
-This software was entirely designed and written by a human,
-not a LLM.
+# Made in Canada / Fabriqué au Canada
 
-This software is licensed under the GNU GPL v2.0 Only licence.
+# This software was entirely designed and written by a human,
+# not a LLM.
 
-Its source code can be found here:
+# This software is licensed under the GNU GPL v2.0 Only licence.
 
-https://github.com/jordanbussanich/sqlite_searcher
+# Its source code can be found here:
 
-This software includes third-party libraries licensed under
-their respective licences. Licence and copyright information is
-available at:
+# https://github.com/jordanbussanich/sqlite_searcher
 
-https://github.com/jordanbussanich/sqlite_searcher/licences""")
+# This software includes third-party libraries licensed under
+# their respective licences. Licence and copyright information is
+# available at:
+
+# https://github.com/jordanbussanich/sqlite_searcher/licences""")
