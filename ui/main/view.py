@@ -12,26 +12,6 @@ import tkinter.font as tkfont
 from dataclasses import dataclass
 from tkinter import ttk, filedialog, messagebox
 
-def set_theme(root: tk.Tk) -> None:
-    style = ttk.Style()
-
-    available_themes = set(style.theme_names())
-
-    preferred: list[str] = []
-    if sys.platform.startswith("win"):
-        preferred = ["vista", "winnative", "xpnative", "clam"]
-    
-    elif sys.platform == "darwin":
-        preferred = ["aqua", "clam"]
-    
-    else:
-        preferred = ["yaru", "adwaita", "clam", "alt", "classic", "default"]
-    
-    for theme in preferred:
-        if theme in available_themes:
-            style.theme_use(theme)
-            return
-
 
 class MainView:
     @dataclass
@@ -45,8 +25,6 @@ class MainView:
     def __init__(self, root: tk.Tk, controller, version: str) -> None:    
         self.controller = controller
         self.version = version
-        
-        set_theme(root)
 
         default_font = tkfont.nametofont("TkDefaultFont")
 
