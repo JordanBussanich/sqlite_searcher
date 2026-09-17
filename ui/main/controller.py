@@ -8,14 +8,19 @@ import threading
 
 import sqlite_search
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .view import MainView
+
 class MainController:
+    @property
+    def view(self) -> MainView:
+        return self._view
+
+
     def __init__(self) -> None:
-        self.view = None
         pass
-
-
-    def bind_view(self, view) -> None:
-        self.view = view
     
 
     def search(

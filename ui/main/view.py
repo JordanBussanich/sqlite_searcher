@@ -11,19 +11,29 @@ import tkinter.font as tkfont
 
 from dataclasses import dataclass
 from tkinter import ttk, filedialog, messagebox
+from typing import TYPE_CHECKING
+
+from ..window_manager import *
+
+if TYPE_CHECKING:
+    from .controller import MainController
 
 
-class MainView:
+class MainView(AbstractView):
     @dataclass
     class ResultsItem:
         table_name: str
         search_term: str
         column_name: str
         row_id: int
+
+
+    @property
+    def controller(self) -> MainController:
+        return self._controller
     
 
-    def __init__(self, root: tk.Tk, controller, version: str) -> None:    
-        self.controller = controller
+    def __init__(self, root: tk.Tk, version: str) -> None:    
         self.version = version
 
         default_font = tkfont.nametofont("TkDefaultFont")

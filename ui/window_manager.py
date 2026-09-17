@@ -4,43 +4,44 @@
 # SQLite Search UI
 # Hacked together by Jordan Bussanich
 
-import tkinter as tk
-
 from abc import ABC, abstractmethod
 
 class AbstractWindow(ABC):
-    @abstractmethod
-    def open(self) -> None:
-        pass
-
     def __init__(
         self, 
         view: AbstractView, 
         controller: AbstractController,
-        top_level: tk.TopLevel
+        version: str
     ) -> None:
         self.view = view
         self.controller = controller
-        self.top_level = top_level
+        self.version = version
+
+        # Bind the controller/view
+        self.view._controller = controller
+        self.controller._view = view
+
+
+    @abstractmethod
+    def open(self) -> None:
+        pass
 
 
 class AbstractView(ABC):
-    def __init__(self) -> None:
-        self._controller: AbstractController
-
-
     @property
     @abstractmethod
     def controller(self) -> AbstractController:
         pass
 
+    def __init__(self) -> None:
+        self._controller: AbstractController
+
 
 class AbstractController(ABC):
-    def __init__(self) -> None:
-        self._view: AbstractView
-
-
     @property
     @abstractmethod
     def view(self) -> AbstractView:
         pass
+
+    def __init__(self) -> None:
+        self._view: AbstractView
